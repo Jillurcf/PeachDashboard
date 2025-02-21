@@ -18,7 +18,7 @@ import SettingsFaq from "../pages/SettingsFaq";
 import SettingsTermsAndConditions from "../pages/SettingsTermsAndConditions";
 import EditTermsAndCondition from "../pages/EditTermsAndConditions";
 import Questionaries from "../pages/Questionaries";
-import Club from './../pages/Club';
+
 import Volunteer from "../pages/Volunteer";
 import Profile from "../pages/Profile";
 import SeeSetupTrialMatch from "../pages/SeeSetupTrialMatch";
@@ -39,81 +39,78 @@ const handleNotifications = (event: React.MouseEvent<HTMLDivElement>) => {
 const router = createBrowserRouter([
     {
         path: "/",
-        element: <Dashboard handleNotifications={handleNotifications} />,
+        element: <Dashboard />,
         errorElement: <ErrorPage />,
         children: [
             {
                 path: "/",
-                element: <AdminRoutes><DasboardHome /></AdminRoutes>,
+                element:<DasboardHome />
             },
-            {
-                path: "/club",
-                element: <AdminRoutes><Club /></AdminRoutes>,
-            },
+           
             {
                 path: "/notifications",
-                element: <AdminRoutes><Notifications /></AdminRoutes>,
+                element: <Notifications />
             },
             {
                 path: "/subscriptions",
-                element: <AdminRoutes><Subscriptions /></AdminRoutes>,
+                element: <Subscriptions />
             },
             {
                 path: "/seeTrialMatch",
-                element: <AdminRoutes><SeeSetupTrialMatch /></AdminRoutes>
+                element: <SeeSetupTrialMatch />
             },
             {
                 path: "/volunteer",
-                element: <AdminRoutes><Volunteer /></AdminRoutes>
+                element:<Volunteer />
             },
             {
                 path: "/manage-users",
-                element: <AdminRoutes><Manage_Users /></AdminRoutes>,
+                element: <Manage_Users />
             },
             {
                 path: "/manage-users/seller-profile/:id",
-                element: <AdminRoutes><Seller_Profile /></AdminRoutes>,
+                element: <Seller_Profile />
             },
             {
                 path: "/love",
-                element: <AdminRoutes><Love /></AdminRoutes>,
+                element: <Love />
             },
             {
                 path: "/transactions",
-                element: <AdminRoutes><Transactions /></AdminRoutes>,
+                element:<Transactions />,
             },
             {
                 path: "/questionaries",
-                element:<AdminRoutes> <Questionaries /></AdminRoutes>
+                element: <Questionaries />
             },
             {
                 path: "/feedback",
-                element: <AdminRoutes><FeedBack /></AdminRoutes>
+                element: <FeedBack />
             },
             {
                 path: "/settings",
-                element: <AdminRoutes><SettingsPage /></AdminRoutes>,
+                element: <SettingsPage />
             },
            
             {
                 path: "/settings/personalInformation",
-                element: <AdminRoutes><Settings_personalInformation /></AdminRoutes>,
+                element:<Settings_personalInformation />
             },
             {
                 path: "/settings/faq",
-                element: <AdminRoutes><SettingsFaq /></AdminRoutes>,
+                element:<SettingsFaq />
             },
             {
                 path: "/settings/termsAndCondition",
-                element: <AdminRoutes><SettingsTermsAndConditions /></AdminRoutes>
+                element: <SettingsTermsAndConditions />
             },
             {
                 path: "settings/termsAndCondition/edittermsAndConditions",
-                element: <AdminRoutes><EditTermsAndCondition /></AdminRoutes>
+                element: <EditTermsAndCondition />
             },
             {
                 path: "profile",
-                element:<AdminRoutes> <Profile /></AdminRoutes>
+                element: <Profile />
             },
         ]
     },

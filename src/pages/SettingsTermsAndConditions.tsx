@@ -1,22 +1,41 @@
 import { Button, Spin, Alert } from "antd";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { IoIosArrowBack } from "react-icons/io";
 import { useNavigate } from "react-router-dom";
-import { useGetTermsAndConditionQuery } from "../redux/features/getTermsAndConditionApi";
 
 const SettingsTermsAndConditions = () => {
-  const { data, isLoading, isError } = useGetTermsAndConditionQuery();
   const navigate = useNavigate();
+
+  // Mock data for Terms and Conditions
+  const mockData = {
+    content: "These are the terms and conditions of our service. By using this service, you agree to the following terms..."
+  };
+
+  const [content, setContent] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isError, setIsError] = useState<boolean>(false);
+
+  // Simulate loading and error states
+  useEffect(() => {
+    setTimeout(() => {
+      // Simulate data fetching
+      try {
+        setContent(mockData.content);
+        setIsLoading(false);
+      } catch (error) {
+        setIsError(true);
+        setIsLoading(false);
+      }
+    }, 1000);
+  }, []);
 
   const handleBackSettings = () => {
     navigate("/settings/personalInformation");
   };
 
   const handleEdit = () => {
-    console.log("Edit not works")
-    // if (id) {
-      navigate(`/settings/termsAndCondition/edittermsAndConditions`);
-    // }
+    console.log("Edit button clicked");
+    navigate(`/settings/termsAndCondition/edittermsAndConditions`);
   };
 
   if (isLoading) {
@@ -35,7 +54,6 @@ const SettingsTermsAndConditions = () => {
   }
 
   // Check if data or content is missing
-  const content = data?.data?.content;
   const noData = !content || content.trim() === "";
 
   return (
@@ -58,7 +76,7 @@ const SettingsTermsAndConditions = () => {
       </div>
       <div className="flex justify-end">
         <Button
-          onClick={() => handleEdit()}
+          onClick={handleEdit}
           style={{
             backgroundColor: "#193664",
             color: "#fff",

@@ -5,48 +5,44 @@ import JoditEditor from "jodit-react";
 import { useEffect, useRef, useState } from "react";
 import Swal from "sweetalert2";
 import React from "react";
-import { usePostTermsAndConditionMutation } from "../redux/features/postTermsAndCondition";
-import { useGetTermsAndConditionQuery } from "../redux/features/getTermsAndConditionApi";
 
 const EditTermsAndCondition: React.FC = () => {
   const navigate = useNavigate();
   const editor = useRef(null);
   const [content, setContent] = useState<string>("");
-  
-  // Initialize the mutation
-  const [postTermsAndCondition, { isLoading }] = usePostTermsAndConditionMutation();
-  const {data} = useGetTermsAndConditionQuery();
+
+  // Mock data for terms and conditions
+  const mockData = "These are the initial terms and conditions. Feel free to edit them as needed.";
 
   useEffect(() => {
-    const existingData = data?.data?.content
-    // Load initial data (replace with actual data fetching)
-    setContent(existingData); // Use the mock data content
+    // Load initial data (simulating fetching data)
+    setContent(mockData);
   }, []);
 
-  const handleUpdate = async () => {
+  const handleUpdate = () => {
     try {
+      // Simulate cleaning and updating content
       const div = document.createElement("div");
       div.innerHTML = content;
       const cleanedContent = div.textContent || div.innerHTML || "";
-      // Make the API call
-      const response = await postTermsAndCondition({ content: cleanedContent, status: "1", _method: "PUT" }).unwrap();
 
-      if (response) {
-        Swal.fire({
-          position: "top-center",
-          icon: "success",
-          title: response.message,
-          showConfirmButton: false,
-          timer: 1500,
-        });
-       
-        navigate("/settings/termsAndCondition");
-      }
+      // Simulate successful update
+      console.log("Updated Content:", cleanedContent);
+
+      Swal.fire({
+        position: "top-center",
+        icon: "success",
+        title: "Terms and Conditions updated successfully!",
+        showConfirmButton: false,
+        timer: 1500,
+      });
+
+      navigate("/settings/termsAndCondition");
     } catch (error) {
       Swal.fire({
         icon: "error",
         title: "Try Again...",
-        text: error?.data?.message || "An error occurred",
+        text: "An error occurred while updating the terms and conditions.",
         footer: '<a href="#">Why do I have this issue?</a>',
       });
     }
@@ -73,7 +69,6 @@ const EditTermsAndCondition: React.FC = () => {
         />
         <Button
           onClick={handleUpdate}
-          loading={isLoading} // Show loading state on the button
           style={{
             backgroundColor: "#193664",
             color: "#fff",

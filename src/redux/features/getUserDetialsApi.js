@@ -3,7 +3,7 @@ import { baseApi } from "../api/baseApi";
 const getUserDetails = baseApi.injectEndpoints({
     endpoints: (builder) => ({
         getUserDetails: builder.query({
-            query: (id) => `/user-details/${id}`,
+            query: (id) => `/admin/user/${id}`,
             providesTags: ["User"],
         })
     })

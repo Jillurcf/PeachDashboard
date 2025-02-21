@@ -1,14 +1,13 @@
-import React, { useEffect, useState } from 'react';
-import { Upload, Input, Button, Form, message } from 'antd';
-import type { UploadFile, UploadProps, FormProps } from 'antd';
-import ImgCrop from 'antd-img-crop';
-import { EyeInvisibleOutlined, EyeTwoTone } from '@ant-design/icons';
-import { useGetPersonalInformationQuery } from '../redux/features/getPersonalInformationApi';
-import { useUpdatePersonalInformationMutation } from '../redux/features/putUpdatePersonalInfromation';
-import { useUpdateImageMutation } from '../redux/features/putUpdateImage';
-import Swal from 'sweetalert2';
+import React, { useState, useEffect } from "react";
+import { Upload, Input, Button, Form, message } from "antd";
+import type { UploadFile, UploadProps, FormProps } from "antd";
+import ImgCrop from "antd-img-crop";
+import { EyeInvisibleOutlined, EyeTwoTone } from "@ant-design/icons";
+import Swal from "sweetalert2";
+import { useGetProfileQuery } from "../redux/features/getProfileApi";
+import { useUpdateUserAvatarMutation } from "../redux/features/postUpdateAvatar";
 
-type FileType = Exclude<Parameters<UploadProps['beforeUpload']>[0], undefined>;
+type FileType = Exclude<Parameters<UploadProps["beforeUpload"]>[0], undefined>;
 
 interface FieldType {
   name?: string;
@@ -21,79 +20,73 @@ interface FieldType {
 
 const SettingsPersonalInformation: React.FC = () => {
   const [fileList, setFileList] = useState<UploadFile[]>([]);
-  const [previewImage, setPreviewImage] = useState<string | undefined>(undefined);
+  const [previewImage, setPreviewImage] = useState<string | undefined>(
+    undefined
+  );
   const [form] = Form.useForm();
+  const { data, isLoading, isError } = useGetProfileQuery({});
+  const [updateUserAvatar] = useUpdateUserAvatarMutation();
+  console.log("+++++", data?.data?.avatar);
 
-  // Fetch personal information data
-  const { data, isLoading, isError } = useGetPersonalInformationQuery();
-  const [updateImage] = useUpdateImageMutation();
-  const [updatePersonalInformation] = useUpdatePersonalInformationMutation();
-console.log("28", previewImage);
+  // Mock data for personal information
+  const mockData = {
+    full_name: "John Doe",
+    email: "john.doe@example.com",
+    image: "https://example.com/profile.png", // Replace with an actual image URL
+  };
+
   useEffect(() => {
-    if (data && data.data) {
-      form.setFieldsValue({
-        name: data.data.full_name,
-        email: data.data.email,
-      });
+    // Set the form fields with mock data
+    form.setFieldsValue({
+      name: data?.data?.first_name + data?.data?.last_name,
+      email: data?.data?.email,
+    });
 
-      if (data.data.image) {
-        const imageUrl = data.data.image;
-        console.log(imageUrl);
-        setFileList([
-          {
-            uid: '-1',
-            name: 'profile.png',
-            status: 'done',
-            url: imageUrl,
-          } as UploadFile,
-        ]);
-        setPreviewImage(imageUrl);
-      }
-    } else if (isError) {
-      message.error("Failed to load personal information");
+    if (data?.data?.avatar) {
+      const imageUrl = data?.data?.avatar;
+      setFileList([
+        {
+          uid: "-1",
+          name: "profile.png",
+          status: "done",
+          url: imageUrl,
+        } as UploadFile,
+      ]);
+      setPreviewImage(imageUrl);
     }
-  }, [data, isError, form]);
+  }, [form]);
 
-  const onChange: UploadProps['onChange'] = async ({ fileList: newFileList }) => {
+  const onChange: UploadProps["onChange"] = async ({
+    fileList: newFileList,
+  }) => {
     setFileList(newFileList);
-  
+
     if (newFileList.length > 0) {
       const uploadedFile = newFileList[0].originFileObj; // Get the uploaded file
-  
+
       if (uploadedFile) {
-        const formData = new FormData();
-        formData.append('_method', 'PUT');
-        formData.append('image', uploadedFile, uploadedFile.name); // Append the image file to FormData
-  
+        // Simulating image upload response
         try {
-          const response = await updateImage(formData); // Call the mutation
-          console.log('Image upload response:', response);
-  
-          if (response) {
-            Swal.fire({
-              icon: 'success',
-              title: 'Image Updated',
-              text: 'Your profile image has been successfully updated!',
-              timer: 3000,
-              toast: true,
-              position: 'center',
-              showConfirmButton: false,
-            });
-          } else {
-            Swal.fire({
-              icon: 'error',
-              title: 'Error',
-              text: 'Failed to update the image.',
-            });
-          }
+          const formData = new FormData();
+          formData.append("avatar", uploadedFile )
+          formData.append("_method", "PUT")
+          console.log("formData", formData)
+          const res = await updateUserAvatar({ data: formData });
+          console.log("update image res", res);
         } catch (error) {
-          console.error('Image upload error:', error);
-          Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: 'An error occurred while updating the image.',
-          });
+          console.log(error);
         }
+        console.log("Image upload response:", { status: "success" });
+
+        Swal.fire({
+          icon: "success",
+          title: "Image Updated",
+          text: "Your profile image has been successfully updated!",
+          timer: 3000,
+          toast: true,
+          position: "center",
+          showConfirmButton: false,
+        });
       }
     }
   };
@@ -113,7 +106,7 @@ console.log("28", previewImage);
     imgWindow?.document.write(image.outerHTML);
   };
 
-  const onFinish: FormProps<FieldType>['onFinish'] = async (values) => {
+  const onFinish: FormProps<FieldType>["onFinish"] = async (values) => {
     if (!fileList.length || !fileList[0].originFileObj) {
       message.error("Please upload a profile image");
       return;
@@ -131,22 +124,32 @@ console.log("28", previewImage);
     const imageFile = fileList[0].originFileObj as File;
     formData.append("image", imageFile, imageFile.name);
 
+    // Simulating profile update
     try {
-      await updatePersonalInformation(formData);
-      message.success("Profile updated successfully");
       console.log("FormData content:", Array.from(formData.entries()));
+      Swal.fire({
+        icon: "success",
+        title: "Profile Updated",
+        text: "Your profile has been successfully updated!",
+        timer: 3000,
+        toast: true,
+        position: "center",
+        showConfirmButton: false,
+      });
     } catch (error) {
       message.error("Failed to update profile");
     }
   };
 
-  const onFinishFailed: FormProps<FieldType>['onFinishFailed'] = (errorInfo) => {
-    console.log('Failed:', errorInfo);
+  const onFinishFailed: FormProps<FieldType>["onFinishFailed"] = (
+    errorInfo
+  ) => {
+    console.log("Failed:", errorInfo);
   };
 
   return (
-    <div className='border border-gray-200 h-[80vh] py-12 rounded-2xl flex flex-col items-center'>
-      <div className='flex justify-center mb-6'>
+    <div className="border border-gray-200 h-[80vh] py-12 rounded-2xl flex flex-col items-center">
+      <div className="flex justify-center mb-6">
         <ImgCrop rotationSlider>
           <Upload
             listType="picture-card"
@@ -154,16 +157,15 @@ console.log("28", previewImage);
             onChange={onChange}
             onPreview={onPreview}
           >
-            {fileList.length < 1 && '+ Upload'}
+            {fileList.length < 1 && "+ Upload"}
           </Upload>
         </ImgCrop>
-        
       </div>
       <Form
         name="basic"
         form={form}
         layout="vertical"
-        style={{ width: '100%', maxWidth: '800px', marginTop: "50px" }}
+        style={{ width: "100%", maxWidth: "800px", marginTop: "50px" }}
         onFinish={onFinish}
         onFinishFailed={onFinishFailed}
         autoComplete="off"
@@ -171,53 +173,66 @@ console.log("28", previewImage);
         <Form.Item<FieldType>
           name="name"
           label="Name"
-          
-          rules={[{ required: false, message: 'Please input your name!',  }]}
+          rules={[{ required: false, message: "Please input your name!" }]}
         >
-          <Input  placeholder="Name" className='h-12' />
+          <Input placeholder="Name" className="h-12" />
         </Form.Item>
         <Form.Item<FieldType>
           name="email"
           label="Email"
-          rules={[{ required: true, message: 'Please input your email!' }]}
+          rules={[{ required: true, message: "Please input your email!" }]}
         >
-          <Input readOnly placeholder="Email" className='h-12' />
+          <Input readOnly placeholder="Email" className="h-12" />
         </Form.Item>
         <Form.Item<FieldType>
           name="oldPassword"
           label="Old Password"
-          rules={[{ required: true, message: 'Please input your old password!' }]}
+          rules={[
+            { required: true, message: "Please input your old password!" },
+          ]}
         >
           <Input.Password
-            placeholder='Old Password'
-            className='h-12'
-            iconRender={(visible) => (visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />)}
+            placeholder="Old Password"
+            className="h-12"
+            iconRender={(visible) =>
+              visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />
+            }
           />
         </Form.Item>
         <Form.Item<FieldType>
           name="newPassword"
           label="New Password"
-          rules={[{ required: true, message: 'Please input your new password!' }]}
+          rules={[
+            { required: true, message: "Please input your new password!" },
+          ]}
         >
           <Input.Password
-            placeholder='New Password'
-            className='h-12'
-            iconRender={(visible) => (visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />)}
+            placeholder="New Password"
+            className="h-12"
+            iconRender={(visible) =>
+              visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />
+            }
           />
         </Form.Item>
         <Form.Item<FieldType>
           name="confirmPassword"
           label="Confirm Password"
-          rules={[{ required: true, message: 'Please confirm your password!' }]}
+          rules={[{ required: true, message: "Please confirm your password!" }]}
         >
           <Input.Password
-            placeholder='Confirm Password'
-            className='h-12'
-            iconRender={(visible) => (visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />)}
+            placeholder="Confirm Password"
+            className="h-12"
+            iconRender={(visible) =>
+              visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />
+            }
           />
         </Form.Item>
         <Form.Item>
-          <Button type="primary" className='w-full h-12 bg-[#4964C6]' htmlType="submit">
+          <Button
+            type="primary"
+            className="w-full h-12 bg-[#4964C6]"
+            htmlType="submit"
+          >
             Edit
           </Button>
         </Form.Item>

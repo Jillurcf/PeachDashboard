@@ -9,6 +9,7 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
+import { useGetDashboardQuery } from "../../redux/features/getDashboardApi";
 
 type Props = {};
 
@@ -32,7 +33,8 @@ const SellerActivityChart = (props: Props) => {
     Users: 1,
     Subscribers: 1,
   });
-
+ const { data, isLoading, isError, error } = useGetDashboardQuery({});
+ console.log("chart data", data?.data?.chart_data)
   const handleMouseEnter = (o) => {
     const { dataKey } = o;
     setOpacity((op) => ({ ...op, [dataKey]: 0.5 }));
@@ -47,7 +49,7 @@ const SellerActivityChart = (props: Props) => {
     <div style={{ width: "100%" }}>
       <ResponsiveContainer width="100%" height={300}>
         <LineChart
-          data={mockData}
+          data={data?.data?.chart_data}
           margin={{
             top: 5,
             right: 30,
@@ -65,14 +67,14 @@ const SellerActivityChart = (props: Props) => {
           />
           <Line
             type="monotone"
-            dataKey="Users"
+            dataKey="user_count"
             strokeOpacity={opacity.Users}
             stroke="#82ca9d"
             activeDot={{ r: 8 }}
           />
           <Line
             type="monotone"
-            dataKey="Subscribers"
+            dataKey="match_count"
             strokeOpacity={opacity.Subscribers}
             stroke="#8884d8"
           />

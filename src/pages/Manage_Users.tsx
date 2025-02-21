@@ -6,7 +6,79 @@ import { useGetAllUsersQuery } from "../redux/features/getAllUsersApi";
 import { useGetUserDetailsQuery } from "../redux/features/getUserDetialsApi";
 import { useDeleteUserMutation } from "../redux/features/deleteUserApi";
 import { useSearchUsersQuery } from "../redux/features/getSearchUser";
-import { usePutChangeUserStatusMutation } from "../redux/features/putChangeUserStatus";
+import { useUpdateUserStatusMutation } from "../redux/features/postUpdateUserStatus";
+
+
+const mockUsers = [
+  {
+    id: 1,
+    full_name: "John Doe",
+    email: "john.doe@example.com",
+    location: "New York",
+    subStatus: "Active",
+    plan: "Premium",
+    paymentStatus: "Paid",
+    status: "active",
+    image: image, // Path to your image
+  },
+  {
+    id: 2,
+    full_name: "Jane Smith",
+    email: "jane.smith@example.com",
+    location: "California",
+    subStatus: "Inactive",
+    plan: "Basic",
+    paymentStatus: "Pending",
+    status: "banned",
+    image: image,
+  },
+  {
+    id: 3,
+    full_name: "Mark Johnson",
+    email: "mark.johnson@example.com",
+    location: "Florida",
+    subStatus: "Active",
+    plan: "Standard",
+    paymentStatus: "Paid",
+    status: "active",
+    image: image,
+  },
+  {
+    id: 4,
+    full_name: "Emily Davis",
+    email: "emily.davis@example.com",
+    location: "Texas",
+    subStatus: "Active",
+    plan: "Premium",
+    paymentStatus: "Paid",
+    status: "active",
+    image: image,
+  },
+  {
+    id: 5,
+    full_name: "Michael Brown",
+    email: "michael.brown@example.com",
+    location: "Nevada",
+    subStatus: "Inactive",
+    plan: "Basic",
+    paymentStatus: "Pending",
+    status: "banned",
+    image: image,
+  },
+];
+
+const mockUserDetails = {
+  data: {
+    full_name: "John Doe",
+    email: "john.doe@example.com",
+    location: "New York",
+    level_name: "Gold",
+    points: 150,
+    role: "Admin",
+    created_at: "2022-01-15",
+    image: image, // Path to user image
+  },
+};
 
 const Manage_Users = () => {
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -14,59 +86,54 @@ const Manage_Users = () => {
   const [openModel, setOpenModel] = useState<boolean>(false);
   const [openDeleteModal, setOpenDeleteModal] = useState<boolean>(false);
   const [openViewModal, setOpenViewModal] = useState<boolean>(false);
-  const [userData, setUserData] = useState<UserAction | null>(null);
+  const [userData, setUserData] = useState<any | null>(null);
   const [userId, setUserId] = useState<number | null>(null);
+  const [id, setId] = useState<number | null>(null);
+ 
   const [status, setStatus] = useState<string>("active");
+
+  const { data, isLoading, isErrror } = useGetAllUsersQuery(searchTerm);
+  console.log("data", data)
+  const { data: userDetails } = useGetUserDetailsQuery(userId);
+  const [updateUserStatus] = useUpdateUserStatusMutation();
+  const [deleteUser] = useDeleteUserMutation();
+   
+  
+  console.log("status", status);
 
   const pageSize = 5;
 
-  const { data, isLoading, isError } = searchTerm
-    ? useSearchUsersQuery(searchTerm)
-    : useGetAllUsersQuery({
-        page: currentPage,
-        perPage: pageSize,
-      });
-  console.log("29", data);
-  const { data: userDetails } = useGetUserDetailsQuery(userId, {
-    skip: !userId,
-  });
-  const [deleteUser, { isLoading: isDeleting }] = useDeleteUserMutation();
-  const [putChangeUserStatus, { isLoading: isUpdating }] =
-    usePutChangeUserStatusMutation();
-
-  const handleSearch = (value: string) => {
-    setSearchTerm(value);
-    setCurrentPage(1);
-  };
-
-  const userDataSource =
-    data?.data?.users?.map((user) => ({
-      sId: 1,
-      // image: <img src={user.image || image} className="w-9 h-9 rounded" alt="avatar" />,
-      name: "Name",
-      email: "Email",
-      location: "Location",
-      subStatus: "Subscription status",
-      plan: "plan",
-      paymentStatus: "Payment Status",
-     
-      action: {
-        sId: user.id,
-        // image: <img src={user.image || image} className="w-9 h-9 rounded" alt="avatar" />,
-        name: user.full_name,
-        dateOfBirth: "24-05-2024",
-        contact: "0521545861520",
-        status: user.status,
-        email: user.email,
-      },
-    })) || [];
+  // Mocking the fetch of users
+  const userDataSource = data?.users?.data?.map((user) => ({
+    sId: user.id,
+    image: (
+      <img
+        src={user.avatar || image}
+        className="w-9 h-9 rounded"
+        alt="avatar"
+      />
+    ),
+    name: user.first_name + user?.last_name,
+    email: user.email,
+    location: user.address,
+    status: user?.status,
+    subStatus: user.subStatus,
+    plan: user.plan,
+    paymentStatus: user.paymentStatus,
+    action: {
+      sId: user.id,
+      name: user.full_name,
+      status: user.status,
+      email: user.email,
+    },
+  }));
 
   const columns = [
     {
       title: "Users",
       dataIndex: "image",
       key: "image",
-      render: (_: any, record: UserData) => (
+      render: (_: any, record: any) => (
         <div className="flex items-center gap-4">
           {record.image}
           {record.name}
@@ -75,14 +142,14 @@ const Manage_Users = () => {
     },
     { title: "Email", dataIndex: "email", key: "email" },
     { title: "Location", dataIndex: "location", key: "location" },
-    { title: "Subscription status", dataIndex: "subStatus", key: "subStatus" },
-    { title: "Plan", dataIndex: "plan", key: "plan" },
-    { title: "Payment status", dataIndex: "paymentStatus", key: "paymentStatus" },
+    { title: "status", dataIndex: "status", key: "status" },
+    // { title: "Plan", dataIndex: "plan", key: "plan" },
+    // { title: "Payment status", dataIndex: "paymentStatus", key: "paymentStatus" },
     {
       title: <div className="text-right">Action</div>,
       dataIndex: "action",
       key: "action",
-      render: (_: any, record: UserData) => (
+      render: (_: any, record: any) => (
         <div className="flex items-center justify-end gap-3">
           <button
             onClick={() => handleViewDetails(record.sId)}
@@ -109,9 +176,10 @@ const Manage_Users = () => {
 
   const handlePage = (page: number) => setCurrentPage(page);
 
-  const handleUser = (action: UserAction) => {
-    console.log("97", action);
+  const handleUser = (action: any) => {
+    console.log("acttion", action?.sId)
     setUserData(action);
+    setId(action?.sId);
     setStatus(action.status);
     setOpenModel(true);
   };
@@ -121,46 +189,60 @@ const Manage_Users = () => {
     setOpenViewModal(true);
   };
 
-  const handleDelete = (action: UserAction) => {
-    console.log("109", action);
+  const handleDelete = (action: any) => {
     setUserData(action);
+    setId(action?.sId);
     setOpenDeleteModal(true);
   };
 
   const onDeleteConfirm = async () => {
-    console.log("113", userData);
-    if (userData?.sId) {
-      try {
-        await deleteUser({ id: userData?.sId });
-        setOpenDeleteModal(false);
-        console.log("User deleted successfully");
-      } catch (error) {
-        console.error("Failed to delete user:", error);
-      }
+    console.log('click', id)
+    try{
+      const deleteRes = await deleteUser(id)
+      console.log("deleted response", deleteRes)
+    }catch(error){
+     console.log(error)
     }
+    // if (userData?.sId) {
+    //   console.log("User deleted successfully");
+      setOpenDeleteModal(false);
+    // }
   };
 
   const onConfirmRoleChange = async () => {
-    if (userData?.sId) {
-      try {
-        await putChangeUserStatus({
-          id: userData.sId,
-          data: { status, _method: "PUT" },
-        }).unwrap();
-        setOpenModel(false);
-        console.log("Status updated successfully");
-      } catch (error) {
-        console.error("Error updating status:", error);
+
+    console.log("click", status, id)
+    try {
+      const formData = new FormData();
+      console.log("Before appending:", status, id);
+      
+      if (!status) {
+        throw new Error("Status is undefined or null");
       }
+    
+      formData.append("status", status);
+      formData.append("_method", "PUT");
+    
+      console.log("FormData entries:");
+      for (let pair of formData.entries()) {
+        console.log(pair[0], pair[1]);
+      }
+    
+      const res = await updateUserStatus({ data:formData, id });
+      console.log("status update res", res);
+    } catch (error) {
+      console.error("Error:", error);
     }
+    
+    // if (userData?.sId) {
+    //   console.log("Status updated successfully");
+      setOpenModel(false);
+    // }
   };
 
   const onViewModalClose = () => {
     setOpenViewModal(false);
   };
-
-  if (isLoading) return <p>Loading users...</p>;
-  if (isError) return <p>Error loading users. Please try again later.</p>;
 
   return (
     <div>
@@ -169,7 +251,7 @@ const Manage_Users = () => {
         className="w-full rounded-2xl h-12 bg-base border-0 text-primary placeholder:text-gray-200"
         placeholder="Search by email"
         style={{ backgroundColor: "#f0f0f0", color: "#333333" }}
-        onChange={(e) => handleSearch(e.target.value)}
+        onChange={(e) => setSearchTerm(e.target.value)}
       />
       <div className="py-8">
         <Table
@@ -177,7 +259,7 @@ const Manage_Users = () => {
           columns={columns}
           pagination={{
             pageSize,
-            total: data?.data?.meta?.total || 50,
+            total: mockUsers.length,
             current: currentPage,
             onChange: handlePage,
           }}
@@ -192,12 +274,7 @@ const Manage_Users = () => {
             <Button key="cancel" onClick={() => setOpenModel(false)}>
               Cancel
             </Button>,
-            <Button
-              key="confirm"
-              type="primary"
-              onClick={onConfirmRoleChange}
-              loading={isUpdating}
-            >
+            <Button key="confirm" type="primary" onClick={onConfirmRoleChange}>
               Save Changes
             </Button>,
           ]}
@@ -213,7 +290,7 @@ const Manage_Users = () => {
             value={status}
           >
             <Radio value="active">Active</Radio>
-            <Radio value="banned">Blocked</Radio>
+            <Radio value="blocked">Blocked</Radio>
           </Radio.Group>
         </Modal>
 
@@ -230,7 +307,6 @@ const Manage_Users = () => {
               type="primary"
               danger
               onClick={onDeleteConfirm}
-              loading={isDeleting}
             >
               Delete
             </Button>,
@@ -249,39 +325,40 @@ const Manage_Users = () => {
             </Button>,
           ]}
         >
-          {userDetails ? (
+          {mockUserDetails ? (
             <div className="border border-gray-200 rounded-lg p-12">
-              {userDetails?.data?.image && (
+              {userDetails?.user?.avatar && (
                 <img
-                  src={userDetails?.data?.image}
+                  src={userDetails?.user?.avatar}
                   alt="User Avatar"
                   className="w-24 flex mx-auto mb-12 h-24 rounded-full mb-4"
                 />
               )}
               <p className="text-black text-lg ">
-                <strong>Full Name:</strong> {userDetails.data.full_name}
+                <strong>Full Name:</strong> {userDetails?.user?.name}
               </p>
               <p className="text-black py-2">
-                <strong>Email:</strong> {userDetails.data.email}
+                <strong>Email:</strong> {userDetails?.user?.email}
               </p>
               <p className="text-black">
-                <strong>Location:</strong> {userDetails.data.location || "N/A"}
+                <strong>Location:</strong> {userDetails?.user?.address || "N/A"}
               </p>
               <p className="text-black py-2">
-                <strong>Level:</strong> {userDetails.data.level_name}
+                <strong>Role:</strong> {userDetails?.user?.role}
               </p>
               <p className="text-black">
-                <strong>Points:</strong> {userDetails.data.points}
+                <strong>Status:</strong> {userDetails?.user?.status}
               </p>
-              <p className="text-black py-2">
-                <strong>Role:</strong> {userDetails.data.role}
-              </p>
+              {/* <p className="text-black py-2">
+                <strong>Role:</strong> {mockUserDetails.data.role}
+              </p> */}
               <p className="text-black">
-                <strong>Created At:</strong> {userDetails.data.created_at}
+                <strong>Created At:</strong>{" "}
+                {userDetails?.user?.created_at?.toString().slice(0, 10)}
               </p>
             </div>
           ) : (
-            <p>Loading user details...</p>
+            <p>Loading...</p>
           )}
         </Modal>
       </div>

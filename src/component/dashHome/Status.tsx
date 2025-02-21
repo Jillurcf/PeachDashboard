@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import SelectBox from "../share/SelectBox";
 import { FaArrowTrendUp } from "react-icons/fa6";
 import './Style_dashboard.css';
-import { useGetDashHomeStatusApiQuery } from "../../redux/features/getDashHomeStatusApi";
+import { useGetDashboardQuery } from "../../redux/features/getDashboardApi";
 
 interface CardDataItem {
   id: number;
@@ -14,19 +14,17 @@ interface CardDataItem {
 const Status: React.FC = () => {
   const [selectedCard, setSelectedCard] = useState<number | null>(null);
   const [selectedValue, setSelectedValue] = useState<string | undefined>();
-  const { data, isLoading, isError, error } = useGetDashHomeStatusApiQuery();
+  const { data, isLoading, isError, error } = useGetDashboardQuery({});
 console.log("18", data?.data)
   // Convert the API data into an array format for mapping
-  const cardDataa: CardDataItem[] = data?.data
-  
-    ? [
-        { id: 1, value: data.data.total_users, title: "Total Users", description: "Total registered users" },
-        { id: 2, value: data.data.total_volunteers, title: "Subscriber", description: "Total volunteers" },
-        { id: 3, value: data.data.total_clubs, title: "Earnings", description: "Total clubs" },
+  const cardDataa: CardDataItem[] =  [
+        { id: 1, value: data?.data?.totalUsers, title: "Total Users", description: "Total registered users" },
+        { id: 2, value: data?.data?.totalMatch, title: "Total Match", description: "Total Matches" },
+        { id: 3, value: data?.data?.totalReport, title: "Total Reports", description: "Total Reports" },
       
       ]
-    : [];
-    console.log("28",cardDataa);
+    // : [];
+    // console.log("28",cardDataa);
   const handleCardClick = (cardIndex: number) => {
     setSelectedCard(cardIndex);
   };

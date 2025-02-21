@@ -1,10 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Collapse, Input, Button, message } from "antd";
 import type { CollapseProps } from "antd";
-import { useGetAllFaqQuery } from "../redux/features/getAllFaq";
-import { useAddFaqMutation } from "../redux/features/postFaqApi";
-import { useUpdateFaqMutation } from "../redux/features/putUpdateFaq";
-import { useDeleteFaqMutation } from "../redux/features/deleteFaqApi";
 import { Pencil, Trash } from "lucide-react";
 
 interface FaqData {
@@ -16,29 +12,30 @@ interface FaqData {
 }
 
 const SettingsFaq: React.FC = () => {
-  const { data, isLoading, isError } = useGetAllFaqQuery();
-  const [addFaq] = useAddFaqMutation();
-  const [updateFaq] = useUpdateFaqMutation();
-  const [deleteFaq] = useDeleteFaqMutation();
-  const allFaq = data?.data || [];
+  // Mock Data for FAQs
+  const mockFaqData = [
+    { id: "1", question: "What is your refund policy?", answer: "We offer a 30-day refund policy.", status: "active" },
+    { id: "2", question: "How to contact support?", answer: "You can contact support via email at support@example.com.", status: "active" },
+    { id: "3", question: "What payment methods are accepted?", answer: "We accept Visa, MasterCard, and PayPal.", status: "active" },
+  ];
 
   const [panelData, setPanelData] = useState<FaqData>({});
   const [editingPanel, setEditingPanel] = useState<string | null>(null);
   const [tempQuestion, setTempQuestion] = useState<string>("");
   const [tempAnswer, setTempAnswer] = useState<string>("");
-  const [status, setStatus] = useState<string>("");
 
+  // Initialize panel data with mock FAQs
   useEffect(() => {
     const initialData: FaqData = {};
-    allFaq.forEach((item: any) => {
+    mockFaqData.forEach((item) => {
       initialData[item.id] = {
-        status: item.status,
         question: item.question,
         answer: item.answer,
+        status: item.status,
       };
     });
     setPanelData(initialData);
-  }, [allFaq]);
+  }, []);
 
   const handleAddFaq = () => {
     const newKey = `new-${Date.now()}`;
@@ -63,64 +60,48 @@ const SettingsFaq: React.FC = () => {
     if (faqData) {
       setTempQuestion(faqData.question);
       setTempAnswer(faqData.answer);
-      // setStatus(faqData.status);
     } else if (key.startsWith("new-")) {
       setTempQuestion("");
       setTempAnswer("");
-      setStatus("active");
     }
   };
 
-  const handleSave = async (key: string) => {
-    try {
-      const isNewFaq = key.startsWith("new-");
-      const faqDetails = {
-        question: tempQuestion,
-        answer: tempAnswer,
-        // status,
-      };
+  const handleSave = (key: string) => {
+    const isNewFaq = key.startsWith("new-");
+    const faqDetails = {
+      question: tempQuestion,
+      answer: tempAnswer,
+      status: "active",
+    };
 
-      if (isNewFaq) {
-        const response = await addFaq(faqDetails).unwrap();
-        if (response?.success) {
-          const createdFaq = response.data;
-
-          setPanelData((prevState) => ({
-            ...prevState,
-            [createdFaq.id]: {
-              question: createdFaq.question,
-              answer: createdFaq.answer,
-              status: createdFaq.status,
-            },
-          }));
-          message.success("FAQ created successfully.");
-        } else {
-          message.error("Failed to create FAQ.");
-        }
-      } else {
-        const response = await updateFaq({
-          id: key,
-          data: { ...faqDetails, _method: "PUT" },
-        }).unwrap();
-        if (response?.success) {
-          setPanelData((prevState) => ({
-            ...prevState,
-            [key]: faqDetails,
-          }));
-          message.success("FAQ updated successfully.");
-        } else {
-          message.error("Failed to update FAQ.");
-        }
-      }
-
-      setEditingPanel(null);
-    } catch (error) {
-      message.error("An error occurred while saving the FAQ.");
+    if (isNewFaq) {
+      const newId = `${Date.now()}`; // Simulate a new unique ID for the FAQ
+      setPanelData((prevState) => ({
+        ...prevState,
+        [newId]: faqDetails,
+      }));
+      message.success("FAQ added successfully.");
+    } else {
+      setPanelData((prevState) => ({
+        ...prevState,
+        [key]: faqDetails,
+      }));
+      message.success("FAQ updated successfully.");
     }
+
+    // Clear editing panel state
+    setEditingPanel(null);
   };
 
   const handleCancel = () => {
     setEditingPanel(null);
+  };
+
+  const handleDelete = (key: string) => {
+    const updatedData = { ...panelData };
+    delete updatedData[key];
+    setPanelData(updatedData);
+    message.success("FAQ deleted successfully.");
   };
 
   const items: CollapseProps["items"] = Object.keys(panelData).map((key) => ({
@@ -189,40 +170,6 @@ const SettingsFaq: React.FC = () => {
   const handlePanelChange = (activeKey: string | string[]) => {
     console.log("Active panel changed: ", activeKey);
   };
-
-  // const handleDelete = async (key: string) => {
-  //   try {
-  //     await deleteFaq({ id: key }).unwrap();
-  //     const updatedData = { ...panelData };
-  //     delete updatedData[key];
-  //     setPanelData(updatedData);
-  //     message.success("FAQ deleted successfully.");
-  //   } catch (error) {
-  //     message.error("Failed to delete FAQ.");
-  //   }
-  // };
-  const handleDelete = async (key: string) => {
-    try {
-      if (key.startsWith("new-")) {
-        // Handle unsaved (new) panels
-        const updatedData = { ...panelData };
-        delete updatedData[key]; // Remove the new panel directly
-        setPanelData(updatedData);
-        message.success("Unsaved FAQ deleted successfully.");
-        return; // Exit the function as no API call is needed
-      }
-  
-      // For saved FAQs, delete from the database
-      await deleteFaq({ id: key }).unwrap();
-      const updatedData = { ...panelData };
-      delete updatedData[key]; // Remove the panel from the state
-      setPanelData(updatedData);
-      message.success("FAQ deleted successfully.");
-    } catch (error) {
-      message.error("Failed to delete FAQ.");
-    }
-  };
-  
 
   return (
     <div>

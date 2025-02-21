@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import AuthWrapper from "../component/share/AuthWrapper";
 import { Button, Checkbox, Form, Input } from "antd";
 import { Link, useNavigate } from "react-router-dom";
-import logo from "../assets/Images/LogoOkProPadel.png";
 import { usePostLoginMutation } from "../redux/features/postLoginApi";
 import Swal from "sweetalert2";
 
@@ -37,7 +36,7 @@ const Login: React.FC = () => {
 
     try {
       const response = await setData({ email, password });
-      console.log("Response:", response);
+      console.log("Response:", response?.data?.access_token);
 
       if (response?.error) {
         Swal.fire({
@@ -46,7 +45,7 @@ const Login: React.FC = () => {
           text: response.error.data?.message || "An error occurred.",
         });
       } else if (response?.data) {
-        localStorage.setItem("token", response?.data.data?.token);
+        localStorage.setItem("token", response?.data.access_token);
         if (remember) {
           localStorage.setItem("rememberedEmail", email);
           localStorage.setItem("rememberedPassword", password);
@@ -61,7 +60,10 @@ const Login: React.FC = () => {
           showConfirmButton: false,
           timer: 1500,
         });
-        navigate("/");
+        if(response?.data?.access_token){
+          navigate("/");
+        }
+       
       }
     } catch (error) {
       console.error("Network or unexpected error:", error);
@@ -78,8 +80,8 @@ const Login: React.FC = () => {
       <div className="text-center mb-12">
         <div className="flex py-8">
           <div className="flex items-center mx-auto gap-2">
-            <img src={logo} alt="Logo" className="w-20" />
-            <h1 className="font-bold text-3xl">OkPro Padel</h1>
+            {/* <img src={logo} alt="Logo" className="w-20" /> */}
+            <h1 className="font-bold text-3xl">PEACH</h1>
           </div>
         </div>
         <p>Please enter your email and password to continue</p>

@@ -26,11 +26,12 @@ import { BiPieChartAlt2 } from "react-icons/bi";
 import { IoIosCard } from "react-icons/io";
 import Questionaries from "../../assets/Images/dashboard/questionaries.svg";
 import { BsMicrosoftTeams } from "react-icons/bs";
-import { useGetProfileQuery } from "../../redux/features/getProfleApi";
+
 import { useGetNotificationsQuery } from "../../redux/features/getNotificationApi";
 import { usePostLogoutMutation } from "../../redux/features/postLogout";
 import { HiOutlineUserGroup, HiUserGroup } from "react-icons/hi2";
 import Swal from "sweetalert2";
+import { useGetProfileQuery } from "../../redux/features/getProfileApi";
 
 const { Header, Sider, Content } = Layout;
 
@@ -58,7 +59,7 @@ const menuItems: MenuItem[] = [
 
   {
     path: "/subscriptions",
-    title: "Subscriptions",
+    title: "Report",
     icon: <img src={Request} alt="Logo" width={18} height={18} />,
     activeIcon: <img src={Request1} alt="Logo" width={18} height={18} />,
   },
@@ -130,11 +131,11 @@ const content = (
 );
 
 const Dashboard: React.FC = () => {
-  const { data, isLoading, isError } = useGetProfileQuery();
-  console.log("dash data", data?.data);
-  const { data: notification } = useGetNotificationsQuery();
+  const { data, isLoading, isError } = useGetProfileQuery({});
+  console.log("dash data", data?.data?.first_name);
+  const { data: notification } = useGetNotificationsQuery({});
   const [postLogout] = usePostLogoutMutation();
-  console.log("190", data?.data?.full_name);
+  // console.log("190", data?.data?.full_name);
   const navigate = useNavigate();
   const location = useLocation();
   const allNotify = notification?.data?.map((item) => item?.read_at) || [];
@@ -177,12 +178,12 @@ const Dashboard: React.FC = () => {
           <h1 className="text-[#333333] font-bold text-[24px]">
             <span className="text-[#B0B0B0] px-2">Hello,</span>
             {/* {data?.data?.full_name} */}
-            User
+          {data?.data?.first_name + data?.data?.last_name}
             👋
           </h1>
         );
-      case "/club":
-        return <h1 className="text-[#333333] font-bold text-[24px]">Clubs</h1>;
+      // case "/club":
+      //   return <h1 className="text-[#333333] font-bold text-[24px]">Clubs</h1>;
       case "/request":
         return (
           <h1 className="text-[#333333] font-bold text-[24px]">Request</h1>
@@ -216,7 +217,7 @@ const Dashboard: React.FC = () => {
       default:
         return (
           <h1 className="text-[#333333] font-bold text-[24px]">
-            <span className="text-[#B0B0B0]">Hello,</span> Maria 👋
+            <span className="text-[#B0B0B0]">Hello,</span> {data?.data?.first_name + " " + data?.data?.last_name} 👋
           </h1>
         );
     }
@@ -323,7 +324,7 @@ const Dashboard: React.FC = () => {
                 >
                   {data?.data?.image && data?.data?.image !== "image" ? (
                     <Image
-                      src={data.data.image}
+                      src={data.data.avatar}
                       alt="Profile"
                       style={{
                         width: "40px",
@@ -349,8 +350,8 @@ const Dashboard: React.FC = () => {
                 </Popover>
 
                 <div className="space-y-4">
-                  <h1 className="text-white">Users</h1>
-                  <h1 className="text-white">user@gmail.com</h1>
+                  <h1 className="text-white">{data?.data?.first_name + data?.data?.last_name}</h1>
+                  <h1 className="text-white">{data?.data?.email}</h1>
                 </div>
               </div>
               <Menu.Item
