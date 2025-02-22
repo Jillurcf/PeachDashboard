@@ -2,6 +2,9 @@ import React, { useEffect, useState } from "react";
 import { Collapse, Input, Button, message } from "antd";
 import type { CollapseProps } from "antd";
 import { Pencil, Trash } from "lucide-react";
+import { useGetAllFaqQuery } from "../redux/features/getAllFaq";
+import { useAddFaqMutation } from "../redux/features/postFaqApi";
+import { useDeleteFaqMutation } from "../redux/features/deleteFaqApi";
 
 interface FaqData {
   [key: string]: {
@@ -14,25 +17,49 @@ interface FaqData {
 const SettingsFaq: React.FC = () => {
   // Mock Data for FAQs
   const mockFaqData = [
-    { id: "1", question: "What is your refund policy?", answer: "We offer a 30-day refund policy.", status: "active" },
-    { id: "2", question: "How to contact support?", answer: "You can contact support via email at support@example.com.", status: "active" },
-    { id: "3", question: "What payment methods are accepted?", answer: "We accept Visa, MasterCard, and PayPal.", status: "active" },
+    {
+      id: "1",
+      question: "What is your refund policy?",
+      answer: "We offer a 30-day refund policy.",
+      status: "active",
+    },
+    {
+      id: "2",
+      question: "How to contact support?",
+      answer: "You can contact support via email at support@example.com.",
+      status: "active",
+    },
+    {
+      id: "3",
+      question: "What payment methods are accepted?",
+      answer: "We accept Visa, MasterCard, and PayPal.",
+      status: "active",
+    },
   ];
 
   const [panelData, setPanelData] = useState<FaqData>({});
   const [editingPanel, setEditingPanel] = useState<string | null>(null);
   const [tempQuestion, setTempQuestion] = useState<string>("");
   const [tempAnswer, setTempAnswer] = useState<string>("");
+  const [id, setId] = useState();
+  const { data, isLoading, isError } = useGetAllFaqQuery({
+    page: 10,
+  });
+  const [addFaq] = useAddFaqMutation();
+  const [deleteFaq] = useDeleteFaqMutation();
+  console.log("faqData", data?.faqs?.data);
+  console.log("faqData Q A", tempQuestion, tempAnswer);
 
   // Initialize panel data with mock FAQs
   useEffect(() => {
     const initialData: FaqData = {};
-    mockFaqData.forEach((item) => {
+    data?.faqs?.data.forEach((item) => {
       initialData[item.id] = {
         question: item.question,
         answer: item.answer,
         status: item.status,
       };
+      setId(item?.id);
     });
     setPanelData(initialData);
   }, []);
@@ -66,7 +93,7 @@ const SettingsFaq: React.FC = () => {
     }
   };
 
-  const handleSave = (key: string) => {
+  const handleSave = async (key: string) => {
     const isNewFaq = key.startsWith("new-");
     const faqDetails = {
       question: tempQuestion,
@@ -80,6 +107,16 @@ const SettingsFaq: React.FC = () => {
         ...prevState,
         [newId]: faqDetails,
       }));
+      try {
+        const formData = new FormData();
+        formData.append("question", tempQuestion);
+        formData.append("answer", tempAnswer);
+        console.log("formData", formData);
+        const addFaqRes = await addFaq(formData);
+        console.log("addFaqRes", addFaqRes);
+      } catch (error) {
+        console.log(error);
+      }
       message.success("FAQ added successfully.");
     } else {
       setPanelData((prevState) => ({
@@ -97,10 +134,12 @@ const SettingsFaq: React.FC = () => {
     setEditingPanel(null);
   };
 
-  const handleDelete = (key: string) => {
+  const handleDelete = async (key: string) => {
     const updatedData = { ...panelData };
     delete updatedData[key];
     setPanelData(updatedData);
+    const deleteRes = await deleteFaq(id);
+    console.log("deletedRes", deleteRes);
     message.success("FAQ deleted successfully.");
   };
 

@@ -28,6 +28,7 @@ import ErrorPage from "../pages/ErrorPage";
 import Settings_AboutUs from "../pages/Settings_AboutUs";
 import EditAboutus from "../pages/EditAboutUs";
 import Subscriptions from "../pages/Subscriptions";
+import Report from "../pages/Report";
 
 
 
@@ -52,8 +53,8 @@ const router = createBrowserRouter([
                 element: <Notifications />
             },
             {
-                path: "/subscriptions",
-                element: <Subscriptions />
+                path: "/reports",
+                element: <Report />
             },
             {
                 path: "/seeTrialMatch",

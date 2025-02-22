@@ -5,21 +5,23 @@ import JoditEditor from "jodit-react";
 import { useEffect, useRef, useState } from "react";
 import Swal from "sweetalert2";
 import React from "react";
+import { useGetTermsAndConditionQuery } from "../redux/features/getTermsAndConditionApi";
+import { usePostTermsAndConditionMutation } from "../redux/features/postTermsAndCondition";
 
 const EditTermsAndCondition: React.FC = () => {
   const navigate = useNavigate();
   const editor = useRef(null);
   const [content, setContent] = useState<string>("");
-
-  // Mock data for terms and conditions
-  const mockData = "These are the initial terms and conditions. Feel free to edit them as needed.";
+  const { data, isLoading, isError } = useGetTermsAndConditionQuery({});
+  // console.log("TermsAndCondition", data?.termsAndConditions?.content)
+  const [postTermsAndCondition] = usePostTermsAndConditionMutation();
 
   useEffect(() => {
     // Load initial data (simulating fetching data)
-    setContent(mockData);
+    setContent(data?.termsAndConditions?.content || "");
   }, []);
 
-  const handleUpdate = () => {
+  const handleUpdate = async () => {
     try {
       // Simulate cleaning and updating content
       const div = document.createElement("div");
@@ -28,7 +30,14 @@ const EditTermsAndCondition: React.FC = () => {
 
       // Simulate successful update
       console.log("Updated Content:", cleanedContent);
-
+      try {
+        const formData = new FormData()
+        formData.append("content", cleanedContent)
+      const res = await postTermsAndCondition(formData)
+      console.log("termsandConditionRes", res)
+      } catch (error) {
+        console.log(error);
+      }
       Swal.fire({
         position: "top-center",
         icon: "success",

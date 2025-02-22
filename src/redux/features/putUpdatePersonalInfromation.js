@@ -7,7 +7,7 @@ const putUpdatePutUpdatePersonalInformationApi = baseApi.injectEndpoints({
                 console.log("Updating PutUpdatePersonalInformation with data:", data);
 
                 return {
-                    url: `/personalInformation`, 
+                    url: `/admin/admin-information/update`, 
                     method: 'POST', 
                     body: data,
                 };

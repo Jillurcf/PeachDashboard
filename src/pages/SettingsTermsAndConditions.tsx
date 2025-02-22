@@ -2,6 +2,7 @@ import { Button, Spin, Alert } from "antd";
 import React, { useState, useEffect } from "react";
 import { IoIosArrowBack } from "react-icons/io";
 import { useNavigate } from "react-router-dom";
+import { useGetTermsAndConditionQuery } from "../redux/features/getTermsAndConditionApi";
 
 const SettingsTermsAndConditions = () => {
   const navigate = useNavigate();
@@ -12,19 +13,19 @@ const SettingsTermsAndConditions = () => {
   };
 
   const [content, setContent] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [isError, setIsError] = useState<boolean>(false);
+  // const [isLoading, setIsLoading] = useState<boolean>(true);
+  // const [isError, setIsError] = useState<boolean>(false);
+  const {data, isLoading, isError} = useGetTermsAndConditionQuery({})
 
   // Simulate loading and error states
   useEffect(() => {
     setTimeout(() => {
       // Simulate data fetching
       try {
-        setContent(mockData.content);
-        setIsLoading(false);
+        setContent(data?.termsAndConditions?.content || "");;
+        // setIsLoading(false);
       } catch (error) {
-        setIsError(true);
-        setIsLoading(false);
+        console.log(error)
       }
     }, 1000);
   }, []);

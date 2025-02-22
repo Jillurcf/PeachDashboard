@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { Upload, Input, Button, Form, message } from "antd";
+import { Upload, Input, Button, Form, message, Alert } from "antd";
 import type { UploadFile, UploadProps, FormProps } from "antd";
 import ImgCrop from "antd-img-crop";
 import { EyeInvisibleOutlined, EyeTwoTone } from "@ant-design/icons";
 import Swal from "sweetalert2";
 import { useGetProfileQuery } from "../redux/features/getProfileApi";
 import { useUpdateUserAvatarMutation } from "../redux/features/postUpdateAvatar";
+import { useUpdatePersonalInformationMutation } from "../redux/features/putUpdatePersonalInfromation";
 
 type FileType = Exclude<Parameters<UploadProps["beforeUpload"]>[0], undefined>;
 
@@ -26,6 +27,7 @@ const SettingsPersonalInformation: React.FC = () => {
   const [form] = Form.useForm();
   const { data, isLoading, isError } = useGetProfileQuery({});
   const [updateUserAvatar] = useUpdateUserAvatarMutation();
+  const [updatePersonalInformation] = useUpdatePersonalInformationMutation();
   console.log("+++++", data?.data?.avatar);
 
   // Mock data for personal information
@@ -38,7 +40,8 @@ const SettingsPersonalInformation: React.FC = () => {
   useEffect(() => {
     // Set the form fields with mock data
     form.setFieldsValue({
-      name: data?.data?.first_name + data?.data?.last_name,
+      first_name: data?.data?.first_name,
+      last_name: data?.data?.last_name,
       email: data?.data?.email,
     });
 
@@ -68,9 +71,9 @@ const SettingsPersonalInformation: React.FC = () => {
         // Simulating image upload response
         try {
           const formData = new FormData();
-          formData.append("avatar", uploadedFile )
-          formData.append("_method", "PUT")
-          console.log("formData", formData)
+          formData.append("avatar", uploadedFile);
+          formData.append("_method", "PUT");
+          console.log("formData", formData);
           const res = await updateUserAvatar({ data: formData });
           console.log("update image res", res);
         } catch (error) {
@@ -111,31 +114,50 @@ const SettingsPersonalInformation: React.FC = () => {
       message.error("Please upload a profile image");
       return;
     }
+    console.log(fileList)
 
     // Create a FormData object and append form values
     const formData = new FormData();
-    formData.append("_method", "PUT");
-    formData.append("full_name", values.name || "");
+    // formData.append("_method", "PUT");
+    formData.append("first_name", values.first_name || "");
+    formData.append("last_name", values.last_name || "");
+    formData.append("email", values.email || "");
     formData.append("old_password", values.oldPassword || "");
-    formData.append("new_password", values.newPassword || "");
-    formData.append("confirm_password", values.confirmPassword || "");
+    formData.append("password", values.newPassword || "");
+    formData.append("password_confirmation", values.confirmPassword || "");
 
     // Append the image file as a File object
     const imageFile = fileList[0].originFileObj as File;
-    formData.append("image", imageFile, imageFile.name);
+    formData.append("avatar", imageFile, imageFile.name);
 
     // Simulating profile update
     try {
+      console.log("formData", formData)
+      const updataRes = await updatePersonalInformation(formData)
+      console.log("update res",updataRes)
       console.log("FormData content:", Array.from(formData.entries()));
-      Swal.fire({
-        icon: "success",
-        title: "Profile Updated",
-        text: "Your profile has been successfully updated!",
-        timer: 3000,
-        toast: true,
-        position: "center",
-        showConfirmButton: false,
-      });
+      if(updataRes?.data?.success === true) {
+        Swal.fire({
+          icon: "success",
+          title: "Profile Updated",
+          text: "Your profile has been successfully updated!",
+          timer: 3000,
+          toast: true,
+          position: "center",
+          showConfirmButton: false,
+        });
+      }else {
+        Swal.fire({
+          icon: "warning",
+          title: "Profile not Updated",
+          text: updataRes?.error?.data?.error,
+          timer: 3000,
+          toast: true,
+          position: "center",
+          showConfirmButton: false,
+        });
+        console.log(updataRes?.error?.data?.error)
+      }
     } catch (error) {
       message.error("Failed to update profile");
     }
@@ -170,17 +192,30 @@ const SettingsPersonalInformation: React.FC = () => {
         onFinishFailed={onFinishFailed}
         autoComplete="off"
       >
-        <Form.Item<FieldType>
-          name="name"
-          label="Name"
-          rules={[{ required: false, message: "Please input your name!" }]}
-        >
-          <Input placeholder="Name" className="h-12" />
-        </Form.Item>
+        <div className="flex gap-4">
+          <Form.Item<FieldType>
+            name="first_name"
+            label="First Name"
+            rules={[{ required: false, message: "Please input your name!" }]}
+            className="flex-1"
+          >
+            <Input placeholder="First Name" className="h-12" />
+          </Form.Item>
+
+          <Form.Item<FieldType>
+            name="last_name"
+            label="Last Name"
+            rules={[{ required: false, message: "Please input your name!" }]}
+            className="flex-1"
+          >
+            <Input placeholder="Last Name" className="h-12" />
+          </Form.Item>
+        </div>
+
         <Form.Item<FieldType>
           name="email"
           label="Email"
-          rules={[{ required: true, message: "Please input your email!" }]}
+          rules={[{ required: false, message: "Please input your email!" }]}
         >
           <Input readOnly placeholder="Email" className="h-12" />
         </Form.Item>
@@ -188,7 +223,7 @@ const SettingsPersonalInformation: React.FC = () => {
           name="oldPassword"
           label="Old Password"
           rules={[
-            { required: true, message: "Please input your old password!" },
+            { required: false, message: "Please input your old password!" },
           ]}
         >
           <Input.Password
@@ -203,7 +238,7 @@ const SettingsPersonalInformation: React.FC = () => {
           name="newPassword"
           label="New Password"
           rules={[
-            { required: true, message: "Please input your new password!" },
+            { required: false, message: "Please input your new password!" },
           ]}
         >
           <Input.Password
@@ -217,7 +252,7 @@ const SettingsPersonalInformation: React.FC = () => {
         <Form.Item<FieldType>
           name="confirmPassword"
           label="Confirm Password"
-          rules={[{ required: true, message: "Please confirm your password!" }]}
+          rules={[{ required: false, message: "Please confirm your password!" }]}
         >
           <Input.Password
             placeholder="Confirm Password"

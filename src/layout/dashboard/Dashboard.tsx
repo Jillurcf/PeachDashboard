@@ -58,7 +58,7 @@ const menuItems: MenuItem[] = [
   },
 
   {
-    path: "/subscriptions",
+    path: "/reports",
     title: "Report",
     icon: <img src={Request} alt="Logo" width={18} height={18} />,
     activeIcon: <img src={Request1} alt="Logo" width={18} height={18} />,
