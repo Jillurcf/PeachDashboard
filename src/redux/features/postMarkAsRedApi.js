@@ -5,8 +5,8 @@ const postMarkAsReadApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     MarkAsRead: builder.mutation({
       query: (id) => ({
-        url: `/notifications/read/${id}`,  // Ensure the correct route
-        method: 'POST',
+        url: `/notifications/mark-as-read?notification_id=${id}`,  // Ensure the correct route
+        method: 'PUT',
         // body: data,
       }),
       invalidatesTags: ["Notifications"]

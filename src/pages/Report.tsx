@@ -365,7 +365,7 @@ const Report = () => {
                 </p>
 
                 <p className="text-black">
-                  <strong>Created At:</strong>{" "}
+                  <strong>Created At:</strong>
                   {userDetails?.report?.created_at.toString().slice(0, 10)}
                 </p>
               </div>
@@ -379,7 +379,7 @@ const Report = () => {
                   />
                 )}
                 <p className="text-black text-lg ">
-                  <strong>Full Name:</strong>{" "}
+                  <strong>Full Name:</strong>
                   {userDetails?.report?.user?.name || "xyz"}
                 </p>
                 <p className="text-black py-2">
