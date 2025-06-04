@@ -46,7 +46,7 @@ interface MenuItem {
 const menuItems: MenuItem[] = [
   {
     path: "/",
-    title: "Dashboardss",
+    title: "Dashboards",
     icon: <BiPieChartAlt2 size={18} color="white" />,
     activeIcon: <FaChartPie size={18} color="white" />,
   },
