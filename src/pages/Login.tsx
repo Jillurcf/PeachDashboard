@@ -36,7 +36,7 @@ const Login: React.FC = () => {
 
     try {
       const response = await setData({ email, password });
-      console.log("Response:", response?.data?.access_token);
+      console.log("Response:", response);
 
       if (response?.error) {
         Swal.fire({
