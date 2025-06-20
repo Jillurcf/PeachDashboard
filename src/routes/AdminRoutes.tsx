@@ -5,7 +5,7 @@ const AdminRoutes = ({ children }) => {
     const location = useLocation();
    
     const token = localStorage.getItem('token');
-    console.log(user?.user);
+    // console.log(user?.user);
 
     // Check if the user has the admin role
     if (token) {
