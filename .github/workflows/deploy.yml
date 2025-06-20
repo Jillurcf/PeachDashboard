@@ -21,8 +21,8 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           port: 22
           script: |
-            git config --global --add safe.directory /var/www
-            cd /var/www/backend
+            git config --global --add safe.directory ${{ secrets.EC2_APP_DIR }}
+            cd ${{ secrets.EC2_APP_DIR }}/backend
             # git reset --hard origin/main
             git stash push -m "before deploy"
             git pull origin main
@@ -44,8 +44,8 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           port: 22
           script: |
-            git config --global --add safe.directory /var/www
-            cd /var/www/frontend
+            git config --global --add safe.directory ${{ secrets.EC2_APP_DIR }}
+            cd ${{ secrets.EC2_APP_DIR }}/frontend
             # git reset --hard origin/main
             git stash push -m "before deploy"
             git pull origin main
@@ -54,6 +54,3 @@ jobs:
  
             # Permission fix
             docker compose exec -T -u root peach_app chmod -R 775 /var/www/backend/public
- 
- 
- 

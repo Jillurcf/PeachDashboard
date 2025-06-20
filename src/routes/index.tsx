@@ -45,7 +45,7 @@ const router = createBrowserRouter([
         children: [
             {
                 path: "/",
-                element:<DasboardHome />
+                element:<AdminRoutes><DasboardHome /></AdminRoutes>
             },
            
             {
